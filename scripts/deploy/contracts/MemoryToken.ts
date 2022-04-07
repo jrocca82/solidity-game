@@ -1,6 +1,6 @@
 import { deployContract } from "../utils";
 
-export const contractNames = () => ["token"];
+export const contractNames = () => ["memoryToken"];
 
 export const constructorArguments = () => [
   process.env.CONSTRUCTOR_TOKEN_NAME,
@@ -11,7 +11,7 @@ export const constructorArguments = () => [
 export const deploy = async (deployer, setAddresses) => {
   console.log("deploying Token");
   const token = await deployContract(
-    "Token",
+    "MemoryToken",
     constructorArguments(),
     deployer,
     1
