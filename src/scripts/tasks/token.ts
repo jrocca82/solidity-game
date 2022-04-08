@@ -1,5 +1,5 @@
 import { task } from "hardhat/config";
-import contracts from "../../contracts.json";
+import contracts from "../../../contracts.json";
 import { ethers as tsEthers } from "ethers";
 import { getLedgerSigner } from "../utils";
 

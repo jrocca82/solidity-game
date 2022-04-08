@@ -61,7 +61,17 @@ describe("Memory Token", () => {
     expect(owner.address === user.address);
 
     //Check owner can see tokens
-    let logs = [];
-    expect(logs.length === 1);
+    const balanceOfUser = await token.balanceOf(user.address);
+    let array = [];
+    for (let i = 0; i < balanceOfUser; i++) {
+      let id = token.tokenOfOwnerByIndex(user.address, i);
+      array.push(id);
+      i + 1;
+    }
+    expect(array === [1]);
+
+    //Check token URI
+    let tokenURI = await token.tokenURI("1");
+    expect(tokenURI === "https://www.token-uri.com/nft");
   });
 });
