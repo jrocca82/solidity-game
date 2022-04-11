@@ -1,4 +1,56 @@
 /* Styles go here */
+.headerBar {
+  background-color: #272222;
+  height: 50px;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+  align-items: center;
+  width: "100%";
+}
+
+.headerIcon {
+  width: 30px;
+  margin-right: 10px;
+}
+
+.titleWrapper {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+  align-items: center;
+  width: 225px;
+}
+
+.metamaskWrapper {
+  width: 50px;
+}
+
+.headerTitle {
+  color: white;
+  text-decoration: underline;
+  font-size: 24px;
+}
+
+.account {
+  color: rgb(146, 137, 137);
+  text-align: left;
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  padding-right: 15px;
+  text-decoration: underline;
+  text-decoration-color: white;
+}
+
+.web3 {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: flex-end;
+  align-items: center;
+}
 
 .token {
   height: 150px;

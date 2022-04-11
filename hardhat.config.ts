@@ -5,7 +5,7 @@ import "@nomiclabs/hardhat-ethers";
 import "@openzeppelin/hardhat-upgrades";
 import "@nomiclabs/hardhat-etherscan";
 import "hardhat-contract-sizer";
-import "./scripts/tasks";
+import "./src/scripts/tasks";
 import "solidity-coverage";
 import { ethers } from "ethers";
 
@@ -16,10 +16,10 @@ const defaultEtherBalance = "100000000";
 
 export default {
   paths: {
-    sources: "./contracts",
+    sources: "./src/contracts",
     cache: "./cache",
-    artifacts: "./build",
-    tests: "./tests"
+    artifacts: "./src/build",
+    tests: "./src/tests"
   },
   networks: {
     hardhat: {

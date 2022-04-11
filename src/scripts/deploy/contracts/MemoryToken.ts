@@ -17,6 +17,6 @@ export const deploy = async (deployer, setAddresses) => {
     1
   );
   console.log(`deployed Token to address ${token.address}`);
-  setAddresses({ token: token.address });
+  setAddresses({ memoryToken: token.address });
   return token;
 };
