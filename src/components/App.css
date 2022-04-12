@@ -1,12 +1,20 @@
 /* Styles go here */
+body {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  flex-flow: row wrap;
+  width: 100%;
+}
+
 .headerBar {
   background-color: #272222;
   height: 50px;
   display: flex;
   flex-flow: row wrap;
-  justify-content: center;
-  align-items: center;
-  width: "100%";
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100%;
 }
 
 .headerIcon {
@@ -50,11 +58,27 @@
   flex-flow: row wrap;
   justify-content: flex-end;
   align-items: center;
+  margin-bottom: 25px;
+}
+
+.game-grid {
+  justify-content: center;
+  width: 100%;
+  align-items: center;
+}
+
+.matching-grid {
+  justify-content: center;
+  width: 400px;
+  display: grid;
+  grid-template-columns: 150px 150px 150px 150px;
+}
+
+.game-piece {
+  width: 150px;
+  height: 150px;
 }
 
 .token {
-  height: 150px;
-  width: 150px;
-  border-radius: 50%;
-  display: inline-block;
+  color: red;
 }
