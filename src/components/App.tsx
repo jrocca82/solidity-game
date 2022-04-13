@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useCallback } from "react";
 import { ethers } from "ethers";
 import "./App.css";
 //Note: Must run hh:compile to produce .build folder with abi
@@ -15,7 +15,7 @@ import pizza from "./images/pizza.png";
 import blank from "./images/blank.png";
 import white from "./images/white.png";
 
-const CARD_ARRAY = [
+let CARD_ARRAY = [
   {
     name: "cheeseburger",
     img: cheeseburger,
@@ -67,70 +67,80 @@ const CARD_ARRAY = [
 ];
 
 const MemoryGame: React.FC = () => {
-  // Connect to Web3 provider
-  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  //Set states
   const [account, setAccount] = React.useState<string | undefined>("0x0");
   const [tokenArray, setTokenArray] = React.useState<string[]>([]);
   const [cardsChosen, setCardsChosen] = React.useState<string[]>([]);
-  const [cardsChosenId, setCardsChosenId] = React.useState<number[]>([]);
-  const [cardsWon, setCardsWon] = React.useState<number[]>([]);
+  const [cardsChosenId, setCardsChosenId] = React.useState<(string | number)[]>(
+    []
+  );
+  const [cardsWon, setCardsWon] = React.useState<(string | number)[]>([]);
+
+  // Connect to Web3 provider
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
 
   // Account signer...
   const signer = provider.getSigner();
 
+  //Connect user metamask
+  const connectMetamask = async () => {
+    await provider.send("eth_requestAccounts", []);
+    setAccount(await signer.getAddress());
+  };
+
   //Connect contract
   const abi = MemoryToken.abi;
-  const token = new ethers.Contract(
-    "0x0431eddEFC03a2DB949411DE234b674818F7b8c3",
-    abi,
-    signer
-  );
+  var tokenAddress = "0x0431eddEFC03a2DB949411DE234b674818F7b8c3";
 
+  const token = new ethers.Contract(tokenAddress, abi, signer);
+
+  //Check user connection
   //@ts-ignore
   const connected = ethereum.isConnected();
 
-  const randomCardArray = CARD_ARRAY.sort(() => 0.5 - Math.random());
+  //Front end logic
+  React.useEffect(() => {
+    const randomCardArray = () => CARD_ARRAY.sort(() => 0.5 - Math.random());
+    CARD_ARRAY = randomCardArray();
+  }, []);
 
-  const connectMetamask = async () => {
-    await provider.send("eth_requestAccounts", []);
-  };
-
+  //Update Tokens won
   const updateTokens = async () => {
-    const userAddress = setAccount(await signer.getAddress());
-    const totalSupply = await token.balanceOf(userAddress);
+    const totalSupply = await token.balanceOf(signer._address);
     for (let i = 0; i < totalSupply; i++) {
-      let id = token.tokenOfOwnerByIndex(userAddress, i);
+      let id = token.tokenOfOwnerByIndex(signer._address, i);
       let tokenURI = token.tokenURI(id);
       setTokenArray(tokenURI);
     }
     return tokenArray;
   };
 
-  const chooseImage = (cardId) => {
+  //Image src attribute
+  const getAttribute = (event) => event.target.getAttribute("data-id");
+
+  const chooseImage = (cardId: number | string) => {
     cardId = cardId.toString();
-    //@ts-ignore
     if (cardsWon.includes(cardId)) {
       return white;
-    }
-    //@ts-ignore
-    else if (cardsChosenId.includes(cardId)) {
-      return randomCardArray[cardId].img;
+    } else if (cardsChosenId.includes(cardId)) {
+      return CARD_ARRAY[cardId].img;
     } else {
       return blank;
     }
   };
 
+  //Game logic
+  React.useEffect(() => {
+    if (cardsChosen.length !== 2) {
+      return;
+    }
+    checkForMatch();
+  }, [cardsChosenId, cardsChosen]);
+
   const flipCard = async (cardId: number) => {
-    let alreadyChosen = cardsChosen.length;
     setCardsChosen([...cardsChosen, CARD_ARRAY[cardId].name]);
     setCardsChosenId([...cardsChosenId, cardId]);
-
-    if (alreadyChosen === 1) {
-      setTimeout(checkForMatch, 100);
-    }
   };
-
-  const getAttribute = (event) => event.target.getAttribute("data-id");
 
   const checkForMatch = async () => {
     const optionOneId = cardsChosenId[0];
@@ -139,19 +149,23 @@ const MemoryGame: React.FC = () => {
     if (optionOneId == optionTwoId) {
       alert("You have clicked the same image!");
     } else if (cardsChosen[0] === cardsChosen[1]) {
-      alert("You found a match");
-      token.methods
-        .mint(account, CARD_ARRAY[optionOneId].img.toString())
-        .send({ from: account })
-        .on("transactionHash", (hash) => {
-          setCardsWon([...cardsWon, optionOneId, optionTwoId]);
-          setTokenArray([...tokenArray, CARD_ARRAY[optionOneId].img]);
-        });
+      alert("You found a match!");
+      //Mint and send token
+      await token.mint(account, CARD_ARRAY[optionOneId].img.toString());
+      await token.send({ from: account });
+      token.on("transactionHash", () => {
+        setCardsWon([...cardsWon, optionOneId, optionTwoId]);
+        setTokenArray([...tokenArray, CARD_ARRAY[optionOneId].img]);
+      });
     } else {
       alert("Sorry, try again");
     }
+
+    //Reset game
     setCardsChosen([]);
     setCardsChosenId([]);
+
+    //Game end
     if (cardsWon.length === CARD_ARRAY.length) {
       alert("Congratulations! You found them all!");
     }
@@ -193,20 +207,25 @@ const MemoryGame: React.FC = () => {
             <span className="account">Rinkeby Contract ({token.address})</span>
           </a>
         </div>
+        {connected === true ? (
+          <></>
+        ) : (
+          <h5 className="alert">
+            Please connnect your metamask before playing!
+          </h5>
+        )}
         <div className="game-wrapper">
           <div className="matching-grid">
-            {randomCardArray.map((card, key) => {
+            {CARD_ARRAY.map((_, key) => {
               return (
                 <img
                   key={key}
                   data-id={key}
-                  //@ts-ignore
                   src={chooseImage(key)}
                   className="game-piece"
                   onClick={(event) => {
                     let cardId = getAttribute(event);
-                    //@ts-ignore
-                    if (!cardsWon.includes(cardId.toString())) {
+                    if (!cardsWon.includes(cardId)) {
                       flipCard(cardId);
                     }
                   }}
